@@ -1,0 +1,2020 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatGPT Agent</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: white;
+            font-family: Arial, sans-serif;
+            min-width: 940px;
+            min-height: 500px;
+        }
+
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            margin-top: 40px;
+            width: 80%;
+        }
+
+        .container {
+            position: relative;
+            width: 400px;
+            text-align: center;
+        }
+
+        .textarea {
+            width: 80%;
+            height: 150px;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            color: #333;
+            resize: none;
+            background-color: #f0f0f0;
+            outline: none;
+            margin-top: 20px;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: black;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background-color: #333;
+        }
+
+        button:disabled {
+            background-color: gray;
+            color: #ddd;
+            /* cursor: not-allowed; */
+        }
+
+        .response {
+            padding: 10px;
+            border: 2px solid black;
+            border-radius: 8px;
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            color: #333;
+            background-color: #ffffff;
+            outline: none;
+            text-align: left;
+            line-height: 1.5;
+            width: 80%;
+            margin-top: 20px;
+        }
+
+        h3 {
+            font-weight: normal;
+            color: #757474;
+            margin: 7px;
+        }
+
+        .likert-container {
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: 5px;
+            margin-left: 5px;
+            margin-right: 5px;
+        }
+
+        .likert-label {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 0;
+        }
+
+        .likert-scale {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .likert-button {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            background-color: white;
+            cursor: pointer;
+            font-size: 14px;
+            border-radius: 5px;
+            color: black;
+            width: 100px;
+            font-weight: normal;
+        }
+
+        .likert-button:hover {
+            background-color: black;
+            color: white;
+        }
+
+        .likert-button.selected {
+            background-color: black;
+            color: white;
+        }
+
+        .error-message {
+            color: red;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid black;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .instructions {
+            width: 100%;
+            max-width: 80%;
+            margin: 50px auto;
+            padding: 30px;
+            background-color: #f9f9f9;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            font-family: 'Segoe UI', sans-serif;
+            color: #333;
+            text-align: left;
+            max-height: 80%;
+        }
+
+        .instructions-content {
+            font-size: 18px;
+            line-height: 1.7;
+            margin-bottom: 20px;
+            max-height: 100%;
+            scrollbar-width: thin;
+            overflow-y: scroll;
+        }
+
+        .instructions h1 {
+            font-size: 40px;
+            font-weight: 700;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .instructions-content p {
+            margin-bottom: 18px;
+        }
+
+        .instructions-content strong {
+            font-weight: bold;
+            color: #000;
+        }
+
+        .start-button {
+            background-color: #000;
+            color: #fff;
+            border: none;
+            font-size: 18px;
+            padding: 12px 26px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: block;
+            margin: 30px auto 0 auto;
+            transition: background-color 0.2s ease;
+        }
+
+        .start-button:hover {
+            background-color: #333;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .popup {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .popup button {
+            margin: 10px;
+            padding: 10px 15px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+
+        .popup .confirm {
+            background-color: #333;
+            color: white;
+            font-size: 14px;
+        }
+
+        .popup .cancel {
+            background-color: white;
+            color: #333;
+            border-color: transparent;
+            font-size: 14px;
+        }
+
+        .main-container.blurred {
+            filter: blur(5px);
+            pointer-events: none;
+        }
+
+        .age-input {
+            width: 50%;
+            height: 50px;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            color: #333;
+            resize: none;
+            background-color: #f0f0f0;
+            outline: none;
+            text-align: center;
+        }
+
+        .age-control {
+            width: 100%;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            text-align: center;
+            font-family: Arial, sans-serif;
+            color: #333;
+        }
+
+        .age-control h1 {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .age-content {
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 5%;
+        }
+
+        .age-content p {
+            margin-bottom: 15px;
+        }
+
+        .age-content strong {
+            font-weight: bold;
+        }
+
+        .loader-dot {
+            display: inline-block;
+            font-size: 20px;
+            color: black;
+            animation: blink 1s infinite;
+            margin-right: 5px;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 0.2;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        .question-title {
+            text-align: center;
+            font-weight: normal;
+        }
+
+        .question-layout {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 20px;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0;
+        }
+
+        .question-container {
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 1400px;
+            margin-bottom: 1%;
+            border: 2px solid #CACACA;
+            min-width: 792px;
+        }
+
+        .chatgpt-section,
+        .user-section {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 2px solid #CACACA;
+            height: 360px;
+        }
+
+        .navigation-container {
+            width: 100%;
+            display: flex;
+            justify-content: end;
+            gap: 10px;
+            max-width: 1400px;
+            min-width: 792px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- DEMO-ONLY banner (not part of the original study page) -->
+    <div id="demo-banner" style="position: fixed; top: 0; left: 0; right: 0; z-index: 99999; background: #111; color: #fff; padding: 8px 16px; text-align: center; font-family: Arial, sans-serif; font-size: 13px; line-height: 1.45; box-shadow: 0 1px 6px rgba(0,0,0,0.25);">
+        🧪 <strong style="color:#ffd166;">Demonstration only — not the live study.</strong>
+        This is the real experiment interface with data collection removed: nothing you type is saved, transmitted, or recorded, and there is no reCAPTCHA or questionnaire server. Reload to restart.
+        &nbsp;<a href="index.html" style="color:#9ad0ff;">← Back to demos</a>
+    </div>
+
+    <!-- Reserve space equal to the fixed banner's height so page content sits
+         just below it instead of underneath it (recomputed on load and resize). -->
+    <script>
+        (function () {
+            function anchorBelowBanner() {
+                var b = document.getElementById('demo-banner');
+                if (b) document.body.style.paddingTop = b.offsetHeight + 'px';
+            }
+            anchorBelowBanner();
+            document.addEventListener('DOMContentLoaded', anchorBelowBanner);
+            window.addEventListener('load', anchorBelowBanner);
+            window.addEventListener('resize', anchorBelowBanner);
+        })();
+    </script>
+
+    <div class="instructions" id="consent-form">
+        <div class="instructions-content">
+            <h1>Consent Form</h1>
+            <p>We invite you to take part in a study conducted by INRIA (National Institute for Research in Digital
+                Science and Technology) and LAPCOS (Clinical, Cognitive and Social Anthropology and Psychology
+                Laboratory) - University Côte d’Azur, Nice, France</p>
+            <p><strong>Purpose of the Study</strong></p>
+            <p>This study aims to explore the impact of AI, its uses, and how users perceive and judge it.</p>
+            <p><strong>Outcomes of the Study</strong></p>
+            <p>Your participation will help improve the design and configuration of AI systems for better usage and
+                greater transparency.</p>
+            <p><strong>Your Participation</strong></p>
+            <p>If you agree to take part, you will be asked to complete an online questionnaire, which will take
+                approximately 15 minutes. You will also be asked to rate your level of confidence for each question. In
+                addition, you will also be asked to answer questions such as your level of confidence in AI, your age,
+                gender, education level and type of degree, as well as your field of study.</p>
+            <p><strong>Participation Requirements:</strong></p>
+            <ul>
+                <li>Be at least 18 years old.</li>
+                <li>Be fluent in English and have it as your primary language.</li>
+            </ul>
+
+            <p><strong>Your Right to Withdraw from the Study at Any Time</strong></p>
+            <p>Your participation in this research is entirely voluntary. You may stop participating in the
+                questionnaire at any time, without having to provide any justification, and your decision to refuse or
+                discontinue participation will have no consequences.</p>
+
+            <p><strong>Your Right to Privacy and Data Confidentiality</strong></p>
+            <p>This research strictly complies with the General Data Protection Regulation (GDPR). You may withdraw from
+                the study at any time during your participation.</p>
+            <p>Your data will be collected anonymously. As a result, in accordance with data protection regulations, you
+                will not be able to access, modify, or delete it. The data will be archived for 15 years and stored on
+                an encrypted, password-protected hard drive.</p>
+            <p>Additionally, the collected data, as well as the experimental materials used, will be deposited on the
+                Open Science Framework (OSF) platform, in accordance with open science principles.</p>
+            <p>For more information about your rights, you can visit the website cnil.fr.</p>
+
+            <p><strong>Data collected</strong></p>
+            <p>We collect the following data:</p>
+            <ul>
+                <li>Device type (PC, tablet, …)</li>
+                <li>Operating System (iOS, macOS, Android, …)</li>
+                <li>Browser used (Chrome, Firefox, …)</li>
+                <li>Screen width and height in pixels</li>
+                <li>The type of experimentation randomly assigned to you</li>
+                <li>The AI's response</li>
+                <li>Your response to each question</li>
+                <li>Your response time to each question</li>
+                <li>The confidence level you indicated</li>
+                <li>Each key you typed and the timestamp of the action</li>
+            </ul>
+
+            <p>We also anonymously collect all your responses to questionnaires that help us get to know you better (age
+                range, your knowledge, confidence, and frequency of use of AI, your gender, your nationality, the
+                country where you have lived the longest, and your level of education).</p>
+
+            <p>To prevent automated responses made by robots or AI, we use Google's reCAPTCHA. This service may collect
+                personal information, like all Google services. However, we never have access to this information and
+                have no way to correlate it with your responses. If you are not comfortable with the use of reCAPTCHA,
+                we recommend that you do not participate in this experiment.</p>
+
+            <p><strong>Publication of Results</strong></p>
+            <p>
+                The publication of data in publications and public databases will be completely anonymous.
+                The study results will be presented at conferences and published in scientific journals.
+            </p>
+
+            <p><strong>Contact</strong></p>
+            <p>For any questions regarding the study, you may contact the project leads:: Arnaud Legout &lt;<a
+                    href="mailto:arnaud.legout@inria.fr">arnaud.legout@inria.fr</a>&gt;</p>
+
+            <p style="margin-top: 30px;"><strong>Before proceeding, please confirm that you are of legal age:</strong>
+            </p>
+            <label><input type="radio" name="majeur" value="oui"> Yes, I am of legal age</label><br>
+            <label><input type="radio" name="majeur" value="non"> No, I am not of legal age</label>
+            <p id="age-selection-error" class="error-message" style="display: none;">Please select an option.</p>
+
+
+            <p style="margin-top: 30px;"><strong>Based on the information previously provided, please indicate whether
+                    you agree to participate in this study:</strong></p>
+            <label><input type="radio" name="consentement" value="oui"> Yes, I agree to participate in the
+                study</label><br>
+            <label><input type="radio" name="consentement" value="non"> No, I do not agree to participate in the
+                study</label>
+            <p id="consent-error" class="error-message" style="display: none;">Please select an option.</p>
+
+            <div>
+                <button id="consent-button" style="margin-top: 30px;">Continue</button>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="age-control hidden" id="thank-you">
+        <div class="age-content">
+            <h1>Thank you for your interest</h1>
+            <p>We appreciate you taking the time to review the information about our study.</p>
+            <p>Unfortunately, you do not meet the required criteria to participate, or you have chosen not to take part.
+            </p>
+            <p>We fully respect your decision and assure you that it will have no consequences.</p>
+            <p><i>If you have any questions or comments, you can contact us at the following address:</i></p>
+            <p><i><a href="mailto:arnaud.legout@inria.fr">arnaud.legout@inria.fr</a></i></p>
+            <p>Please click the button below to return to Prolific and complete your submission.</p>
+            <a href="prolific-placeholder.html">
+                <button
+                    style="margin-top: 20px; padding: 12px 28px; font-size: 18px; background-color: #000; color: #fff; border: none; border-radius: 6px; cursor: pointer;">
+                    Finish and Return to Prolific
+                </button>
+            </a>
+        </div>
+    </div>
+
+    <!--We use the same age-control and age-content classes for the attention
+    check to guarantee uniform display-->
+    <div class="age-control hidden" id="attention-check-failed">
+        <div class="age-content">
+            <h1>Attention Check Failed</h1>
+            <p>Thank you for taking the time to participate in our study.</p>
+            <p>Unfortunately, you did not pass the attention check questions
+                that are required to ensure high data quality. As a result, you are
+                not eligible to continue with the study.
+            </p>
+            <p>This is a standard part of our quality control process and has no
+                consequences beyond this study. If you have any questions or
+                concerns, you can contact us at:</p>
+            <p><i><a href="mailto:arnaud.legout@inria.fr">arnaud.legout@inria.fr</a></i></p>
+            <p>Please click the button below to return to Prolific.</p>
+            <a href="prolific-placeholder.html">
+                <button
+                    style="margin-top: 20px; padding: 12px 28px; font-size: 18px; background-color: #000; color: #fff; border: none; border-radius: 6px; cursor: pointer;">
+                    Finish and Return to Prolific
+                </button>
+            </a>
+        </div>
+    </div>
+
+    <div class="instructions hidden" style="height: auto;" id="instructions">
+        <div class="instructions-content" style="max-height: 100%;">
+            <p><strong>⏱️ Duration: ~15 minutes</strong></p>
+            <p>You will be asked a series of <strong>21 general knowledge questions — with a twist!</strong></p>
+            <p>For each question:</p>
+            <ol>
+                <li>You will first ask a <strong>built-in version of ChatGPT</strong> (available directly on the
+                    experiment page).</li>
+                <li>Then, you will write <strong>your own freeform answer</strong> based on your understanding.</li>
+            </ol>
+            <p>💬 You are <strong>not required</strong> to follow ChatGPT's suggestion. Use it as you normally would.
+            </p>
+            <p>💡 Please answer using <strong>only your own knowledge</strong> and the information from the built-in
+                version of ChatGPT.<br>
+                <strong>Do not consult any external sources</strong> (e.g., websites, search engines, or other people).
+            </p>
+            <p>At the end of each question, you’ll be asked to <strong>rate your confidence</strong> in your response.
+            </p>
+            <p><strong>🛡️ Important:</strong></p>
+            <ul>
+                <li>Everything you type is recorded as part of the study.</li>
+                <li>The study is <strong>fully anonymous</strong>, but please <strong>do not include any personal or
+                        sensitive information</strong> (e.g., your name, address, or passwords).</li>
+                <li>This is not a <strong>performance test</strong> — no score will be shown at the end.</li>
+                <li>Your <strong>payment is not based on accuracy</strong>, but on completing the task <strong>honestly
+                        and attentively</strong>.</li>
+            </ul>
+            <p>⛔ <strong>Do not</strong> use the browser's "Back" button or reload the page — this may erase your
+                progress.</p>
+            <p>🎯 <strong>Ready? Click Start to begin.</strong></p>
+            <button id="start-button" class="start-button">Start</button>
+        </div>
+    </div>
+
+
+    <div class="instructions hidden" id="questionnaire-instructions" style="max-width: 700px;">
+        <div class="instructions-content">
+            <h1>Thank you for answering the questions!</h1>
+            <p>To finish, we would like to ask you a few quick questions about your experience.</p>
+            <p>This <strong>short questionnaire</strong> will help us better understand your perception of using ChatGPT
+                during the test.</p>
+            <p>Let's finish up!</p>
+            <button id="start-questionnaire-button" class="start-button">Start the questionnaire</button>
+        </div>
+    </div>
+
+    <div class="main-container hidden">
+        <div class="question-container">
+            <h3>1. First read the question</h3>
+            <h3 id="question" class="question-title" style="color: black">What is the planet closest to Earth?</h3>
+        </div>
+
+        <div class="question-layout">
+            <div class="chatgpt-section" style="min-width: 220px;">
+                <h3>2. Second ask ChatGPT</h3>
+                <textarea class="textarea hidden" id="userQuestion" placeholder="Write your question to ChatGPT..."
+                    disabled></textarea>
+                <div id="chatbotResponse" class="response hidden"></div>
+                <p id="demander-error" class="error-message" style="display: none;">Please ask a question to ChatGPT
+                    before continuing.</p>
+                <button id="askButton" onclick="askChatbot()" disabled>Ask</button>
+            </div>
+
+            <div class="user-section">
+                <h3>3. Then give <strong>your</strong> own answer</h3>
+                <textarea class="textarea" id="userAnswer" placeholder="Write your own answer..." disabled></textarea>
+                <p id="answer-error" class="error-message" style="display: none;">Please write your answer before
+                    submitting.</p>
+
+                <div class="likert-container">
+                    <h3>4. Finally rate your confidence in <strong>your</strong> own answer</h3>
+                    <div class="likert-scale" id="likert-scale">
+                        <button class="likert-button" data-value="Not at all confident">Not at all confident</button>
+                        <button class="likert-button" data-value="Slightly confident">Slightly confident</button>
+                        <button class="likert-button" data-value="Moderately confident">Moderately confident</button>
+                        <button class="likert-button" data-value="Confident">Confident</button>
+                        <button class="likert-button" data-value="Very confident">Very confident</button>
+                    </div>
+                </div>
+                <p id="confidence-error" class="error-message" style="display: none;">Please rate your confidence in
+                    answering this question.</p>
+            </div>
+        </div>
+
+        <div class="container-next-button navigation-container">
+            <p id="questionCounter" style="display: none; margin-top: 30px; margin-right: 10px;">1/21</p>
+            <button id="sendButton" onclick="sendAnswer()" style="margin-bottom: 20px;" disabled>Next</button>
+        </div>
+    </div>
+
+
+    <script>
+        // Stub Google reCAPTCHA v3 so the original code path runs unchanged.
+        window.grecaptcha = {
+            ready: function (cb) { cb(); },
+            execute: function () { return Promise.resolve("demo-token"); }
+        };
+        // Intercept the experiment's backend requests. Nothing leaves the browser.
+        (function () {
+            window.fetch = function (url) {
+                var u = (typeof url === "string") ? url : (url && url.url) || "";
+                if (u.indexOf("/verify-captcha") !== -1) {
+                    return Promise.resolve({ json: function () { return Promise.resolve({ success: true, score: 0.9 }); } });
+                }
+                if (u.indexOf("/generate-user-id") !== -1) {
+                    return Promise.resolve({ json: function () { return Promise.resolve({ userId: "demo-" + Math.floor(Math.random() * 1e9) }); } });
+                }
+                // /save-response, /save-thank-you-time, /save-before-pilot-times, etc.
+                return Promise.resolve({ json: function () { return Promise.resolve({ message: "demo - not saved" }); } });
+            };
+        })();
+    </script>
+
+    <script>
+        let questions_zone_1 = [
+            {
+                "question": "What is the heaviest land animal?",
+                "correct_answer": "It's the African Elephant.",
+                "wrong_answer": "It's the Hippopotamus."
+            },
+            {
+                "question": "In which country is the archaeological site of Machu Picchu located?",
+                "correct_answer": "Machu Picchu is located in Peru.",
+                "wrong_answer": "Machu Picchu is located in Chile."
+            },
+            {
+                "question": "What is the traditional dance performed by New Zealand rugby players?",
+                "correct_answer": "That would be the Haka.",
+                "wrong_answer": "That would be the Agbekor."
+            },
+            {
+                "question": "Which woman sparked the movement to end segregation laws in the U.S.?",
+                "correct_answer": "Rosa Parks played that pivotal role.",
+                "wrong_answer": "Maya Angelou played that pivotal role."
+            },
+            {
+                "question": "In what year was Donald Trump elected U.S. President for the first time?",
+                "correct_answer": "He was first elected in 2016.",
+                "wrong_answer": "He was first elected in 2020."
+            },
+            {
+                "question": "Which planet is known as the \"Red Planet\"?",
+                "correct_answer": "That's Mars.",
+                "wrong_answer": "That's Jupiter."
+            },
+            {
+                "question": "How many planets are in our solar system?",
+                "correct_answer": "There are 8 planets in our solar system.",
+                "wrong_answer": "There are 12 planets in our solar system."
+            },
+            {
+                "question": "What is the largest country in the world by area?",
+                "correct_answer": "The largest country by area is Russia.",
+                "wrong_answer": "The largest country by area is China."
+            },
+            {
+                "question": "Which war was fought between the Allies and the Axis powers from 1939 to 1945?",
+                "correct_answer": "That was World War II.",
+                "wrong_answer": "That was World War I."
+            },
+            {
+                "question": "Who wrote on the Origin of Species?",
+                "correct_answer": "It was written by Charles Darwin.",
+                "wrong_answer": "It was written by Jean-Baptiste Lamarck."
+            },
+            {
+                "question": "How many days are there in a leap year?",
+                "correct_answer": "A leap year has 366 days.",
+                "wrong_answer": "A leap year has 365 days."
+            },
+            {
+                "question": "What is the chemical symbol for gold?",
+                "correct_answer": "The symbol for gold is Au.",
+                "wrong_answer": "The symbol for gold is Gd."
+            },
+            {
+                "question": "What is the highest mountain on Earth?",
+                "correct_answer": "That's Mount Everest.",
+                "wrong_answer": "That's Mount Kilimanjaro."
+            },
+            {
+                "question": "What is the currency used in Japan?",
+                "correct_answer": "Japan uses the Yen.",
+                "wrong_answer": "Japan uses the Yuan."
+            },
+            {
+                "question": "In which city is the Vatican located?",
+                "correct_answer": "The Vatican is located in Rome.",
+                "wrong_answer": "The Vatican is located in Venice."
+            },
+            {
+                "question": "Who is the author of the Harry Potter book series?",
+                "correct_answer": "The author is J.K. Rowling.",
+                "wrong_answer": "The author is Stephen King."
+            },
+            {
+                "question": "Who formulated the theory of special relativity?",
+                "correct_answer": "That was Albert Einstein.",
+                "wrong_answer": "That was Niels Bohr."
+            },
+            {
+                "question": "What is the national animal of Australia?",
+                "correct_answer": "It's the kangaroo.",
+                "wrong_answer": "It's the Tasmanian Devil."
+            },
+            {
+                "question": "What is the acronym of the Intergovernmental Panel on Climate Change?",
+                "correct_answer": "The acronym is IPCC.",
+                "wrong_answer": "The acronym is WTO."
+            },
+            {
+                "question": "What is the main organ used for breathing in humans?",
+                "correct_answer": "The lungs are the main organ for breathing.",
+                "wrong_answer": "The nose is the main organ for breathing."
+            },
+            {
+                "question": "Who painted the Mona Lisa?",
+                "correct_answer": "The Mona Lisa was painted by Leonardo da Vinci.",
+                "wrong_answer": "The Mona Lisa was painted by Michelangelo."
+            },
+            {
+                "question": "How many months does a human pregnancy last?",
+                "correct_answer": "A human pregnancy typically lasts 9 months.",
+                "wrong_answer": "A human pregnancy typically lasts 10 months."
+            },
+            {
+                "question": "What is the square root of 16?",
+                "correct_answer": "The square root of 16 is 4.",
+                "wrong_answer": "The square root of 16 is 8."
+            },
+            {
+                "question": "What is the fastest land animal?",
+                "correct_answer": "The cheetah is the fastest land animal.",
+                "wrong_answer": "The leopard is the fastest land animal."
+            },
+            {
+                "question": "What is the name of the South African political activist who became president after 27 years in prison?",
+                "correct_answer": "That's Nelson Mandela.",
+                "wrong_answer": "That's Patrice Lumumba."
+            },
+            {
+                "question": "Which pandemic led to a global lockdown between 2019 and 2020?",
+                "correct_answer": "That was the COVID-19 pandemic.",
+                "wrong_answer": "That was the Spanish Flu."
+            },
+            {
+                "question": "Which element is essential for human bones and teeth and has the chemical symbol 'Ca'?",
+                "correct_answer": "That's calcium.",
+                "wrong_answer": "That's carbon."
+            },
+            {
+                "question": "What does WHO stand for?",
+                "correct_answer": "WHO stands for World Health Organization.",
+                "wrong_answer": "WHO stands for Worldwide Humanitarian Organization."
+            },
+            {
+                "question": "Which famous ship sank after hitting an iceberg in 1912?",
+                "correct_answer": "That would be the Titanic.",
+                "wrong_answer": "That would be the Lusitania."
+            },
+            {
+                "question": "What imaginary animal resembles a horse and has a single horn on its forehead?",
+                "correct_answer": "That's a unicorn.",
+                "wrong_answer": "That's a rhinoceros."
+            }
+        ];
+
+        let questions_zone_2 = [
+            {
+                "question": "The Canary Islands were named after which animal?",
+                "correct_answer": "They were actually named after dogs.",
+                "wrong_answer": "They were named after canaries."
+            },
+            {
+                "question": "In which month do Russians celebrate the October Revolution?",
+                "correct_answer": "It's celebrated in November.",
+                "wrong_answer": "It's celebrated in October."
+            },
+            {
+                "question": "Where are Panama hats made?",
+                "correct_answer": "They're made in Ecuador.",
+                "wrong_answer": "They're made in Panama."
+            },
+            {
+                "question": "What is the largest desert in the world?",
+                "correct_answer": "It's the Antarctic Desert.",
+                "wrong_answer": "It's the Sahara."
+            },
+            {
+                "question": "What is the color of a commercial airplane's black box?",
+                "correct_answer": "It's orange.",
+                "wrong_answer": "It's black."
+            },
+            {
+                "question": "Which 2021 sci-fi film directed by Denis Villeneuve won multiple Oscars?",
+                "correct_answer": "That would be Dune.",
+                "wrong_answer": "That would be Interstellar."
+            },
+            {
+                "question": "How many liters of blood does an average adult human have?",
+                "correct_answer": "Around 5 liters on average.",
+                "wrong_answer": "Around 9 liters on average."
+            },
+            {
+                "question": "What is the average height of an adult African elephant?",
+                "correct_answer": "Roughly 4 meters, or about 13 feet.",
+                "wrong_answer": "Roughly 6 meters, or about 20 feet."
+            },
+            {
+                "question": "Who wrote the book War and Peace?",
+                "correct_answer": "It was written by Tolstoy.",
+                "wrong_answer": "It was written by Dostoevsky."
+            },
+            {
+                "question": "What is the approximate population of China?",
+                "correct_answer": "Roughly 1.4 billion people.",
+                "wrong_answer": "Roughly 1.9 billion people."
+            },
+            {
+                "question": "What was Walt Disney's first full-length animated feature film, released in 1937?",
+                "correct_answer": "That would be Snow White and the Seven Dwarfs.",
+                "wrong_answer": "That would be Pinocchio."
+            },
+            {
+                "question": "What is the approximate population of India?",
+                "correct_answer": "About 1.4 billion people.",
+                "wrong_answer": "About 1 billion people."
+            },
+            {
+                "question": "What is the capital of Canada?",
+                "correct_answer": "The capital is Ottawa.",
+                "wrong_answer": "The capital is Toronto."
+            },
+            {
+                "question": "In what year did the Berlin Wall fall?",
+                "correct_answer": "It fell in 1989.",
+                "wrong_answer": "It fell in 1979."
+            },
+            {
+                "question": "Who was the first president of the United States?",
+                "correct_answer": "That was George Washington.",
+                "wrong_answer": "That was Abraham Lincoln."
+            },
+            {
+                "question": "What is the largest ocean in the world?",
+                "correct_answer": "The Pacific Ocean is the largest.",
+                "wrong_answer": "The Atlantic Ocean is the largest."
+            },
+            {
+                "question": "In which year was the Apollo 11 mission launched?",
+                "correct_answer": "It launched in 1969.",
+                "wrong_answer": "It launched in 1959."
+            },
+            {
+                "question": "How long does it take the Earth to complete one revolution around the Sun?",
+                "correct_answer": "About 365 days.",
+                "wrong_answer": "About 24 hours."
+            },
+            {
+                "question": "What is the largest island in the world?",
+                "correct_answer": "That would be Greenland.",
+                "wrong_answer": "That would be Madagascar."
+            },
+            {
+                "question": "In what year did Christopher Columbus discover the Americas?",
+                "correct_answer": "In 1492.",
+                "wrong_answer": "In 1592."
+            },
+            {
+                "question": "What is the name of the famous supersonic passenger jet that stopped flying in 2003?",
+                "correct_answer": "That was the Concorde.",
+                "wrong_answer": "That was the Boeing 747."
+            },
+            {
+                "question": "How many continents are there?",
+                "correct_answer": "There are 7 continents.",
+                "wrong_answer": "There are 5 continents."
+            },
+            {
+                "question": "What is the name of the international agreement adopted at COP21 in 2015 to limit CO2 emissions?",
+                "correct_answer": "It's called the Paris Agreement.",
+                "wrong_answer": "It's called the Rio Agreement."
+            },
+            {
+                "question": "Which American city was devastated by Hurricane Katrina in 2005?",
+                "correct_answer": "That would be New Orleans.",
+                "wrong_answer": "That would be San Francisco."
+            },
+            {
+                "question": "Which artist is known for cutting off part of his own ear?",
+                "correct_answer": "That was Vincent van Gogh.",
+                "wrong_answer": "That was Pablo Picasso."
+            },
+            {
+                "question": "How many teeth does an average adult human have?",
+                "correct_answer": "An adult typically has 32 teeth.",
+                "wrong_answer": "An adult typically has 28 teeth."
+            }
+        ];
+
+        let questions_zone_3 = [
+            {
+                "question": "What is the approximate length of the Great Wall of China?",
+                "correct_answer": "It stretches for about 20,000 km (12,427 miles).",
+                "wrong_answer": "It stretches for about 10,000 km (6,214 miles)."
+            },
+            {
+                "question": "What is the approximate length of the San Andreas Fault?",
+                "correct_answer": "The San Andreas Fault runs for roughly 1,200 km (746 miles).",
+                "wrong_answer": "The San Andreas Fault runs for roughly 900 km (559 miles)."
+            },
+            {
+                "question": "What is the approximate length of the Amazon River?",
+                "correct_answer": "The Amazon River is about 7,000 km (4,350 miles) long.",
+                "wrong_answer": "The Amazon River is about 5,000 km (3,107 miles) long."
+            },
+            {
+                "question": "Which 1997 Céline Dion album includes the theme song from Titanic?",
+                "correct_answer": "The album is Let's Talk About Love.",
+                "wrong_answer": "The album is Falling into You."
+            },
+            {
+                "question": "What is the approximate speed of light in a vacuum?",
+                "correct_answer": "Light travels at about 300,000 km/s (186,411 miles/second) in a vacuum.",
+                "wrong_answer": "Light travels at about 300,000 m/s (186 miles/second) in a vacuum."
+            },
+            {
+                "question": "What is the title of the first James Bond movie released in 1962 starring Sean Connery?",
+                "correct_answer": "The first James Bond film was Dr. No.",
+                "wrong_answer": "The first James Bond film was No Time to Die."
+            },
+            {
+                "question": "How many official languages are recognized by the European Union?",
+                "correct_answer": "The EU officially recognizes 24 languages.",
+                "wrong_answer": "The EU officially recognizes 32 languages."
+            },
+            {
+                "question": "Who wrote The Republic?",
+                "correct_answer": "The Republic was written by Plato.",
+                "wrong_answer": "The Republic was written by Socrates."
+            },
+            {
+                "question": "Which country won the FIFA World Cup in 1998?",
+                "correct_answer": "France won the 1998 FIFA World Cup.",
+                "wrong_answer": "Brazil won the 1998 FIFA World Cup."
+            },
+            {
+                "question": "What is the approximate length of the Channel Tunnel?",
+                "correct_answer": "The Channel Tunnel is about 50 km (31 miles) long.",
+                "wrong_answer": "The Channel Tunnel is about 20 km (12 miles) long."
+            },
+            {
+                "question": "In what year did India gain independence?",
+                "correct_answer": "India became independent in 1947.",
+                "wrong_answer": "India became independent in 1951."
+            },
+            {
+                "question": "How many natural satellites does the planet Mars have?",
+                "correct_answer": "Mars has two natural moons.",
+                "wrong_answer": "Mars has no natural moons."
+            },
+            {
+                "question": "What is the approximate length of the Great Barrier Reef?",
+                "correct_answer": "The Great Barrier Reef stretches for around 2,500 km (1,553 miles).",
+                "wrong_answer": "The Great Barrier Reef stretches for around 4,500 km (2,796 miles)."
+            },
+            {
+                "question": "What is the approximate circumference of Earth at the equator?",
+                "correct_answer": "Earth's circumference at the equator is roughly 40,000 km (24,855 miles).",
+                "wrong_answer": "Earth's circumference at the equator is roughly 60,000 km (37,282 miles)."
+            },
+            {
+                "question": "How many sovereign countries are there in Africa?",
+                "correct_answer": "Africa has 54 recognized sovereign countries.",
+                "wrong_answer": "Africa has 38 recognized sovereign countries."
+            },
+            {
+                "question": "In which year did construction of the Sagrada Família basilica in Barcelona begin?",
+                "correct_answer": "Construction began in 1882.",
+                "wrong_answer": "Construction began in 1932."
+            },
+            {
+                "question": "In what year did New Zealand gain full independence from the UK?",
+                "correct_answer": "New Zealand became fully independent in 1947.",
+                "wrong_answer": "New Zealand became fully independent in 1931."
+            },
+            {
+                "question": "What is the approximate length of a blue whale?",
+                "correct_answer": "A blue whale grows to about 30 meters (98 feet) long.",
+                "wrong_answer": "A blue whale grows to about 40 meters (131 feet) long."
+            },
+            {
+                "question": "What is the height of the Statue of Liberty?",
+                "correct_answer": "The Statue of Liberty stands roughly 93 meters (305 feet) tall.",
+                "wrong_answer": "The Statue of Liberty stands roughly 127 meters (417 feet) tall."
+            },
+            {
+                "question": "How many countries are members of the European Union in 2023?",
+                "correct_answer": "In 2023, the EU has 27 member countries.",
+                "wrong_answer": "In 2023, the EU has 32 member countries."
+            },
+            {
+                "question": "What is the name of the youth-led climate movement started by Greta Thunberg in 2018?",
+                "correct_answer": "The movement is called Fridays for Future.",
+                "wrong_answer": "The movement is called WWF."
+            },
+            {
+                "question": "Who was the first person to receive two Nobel Prizes?",
+                "correct_answer": "The first person to win two Nobel Prizes was Marie Curie.",
+                "wrong_answer": "The first person to win two Nobel Prizes was Linus Pauling."
+            },
+            {
+                "question": "What is the approximate height of the Eiffel Tower?",
+                "correct_answer": "The Eiffel Tower stands at about 300 meters (984 feet).",
+                "wrong_answer": "The Eiffel Tower stands at about 400 meters (1,312 feet)."
+            },
+            {
+                "question": "What is the maximum depth of the Pacific Ocean?",
+                "correct_answer": "The Pacific Ocean reaches a maximum depth of around 11,000 meters (36,089 feet).",
+                "wrong_answer": "The Pacific Ocean reaches a maximum depth of around 6,000 meters (19,685 feet)."
+            },
+            {
+                "question": "What is the average lifespan of a dolphin in the wild?",
+                "correct_answer": "Wild dolphins typically live around 25 to 30 years.",
+                "wrong_answer": "Wild dolphins typically live around 70 to 75 years."
+            }
+        ];
+
+        let userId = 0;
+        let actualConfidence = 0;
+        let actualQuestion = 0;
+        let responses = [];
+        let confidences = [];
+        let chatbotResponses = [];
+        let userQuestions = [];
+        let tutorial = true;
+
+        let times = [];
+        let lastSubmitTime = null;
+
+        let keystrokes = [];  // buffer for keystrokes of the current question
+        let keystrokesPerQuestion = [];  // array with all the keystrokes of the questions
+        let startTime = null;  // timer for each question
+
+        let timeIndex = 0;
+
+        let isQuestionAsked = false;
+
+        let captcha_scores = [];
+
+        let tutorial_question = {
+            question: "What is the planet closest to Earth?",
+            answers: [
+                "The planet closest to Earth is Mercury"
+            ]
+        }
+
+        let isAttentionCheck1 = false;
+        let isAttentionCheck2 = false;
+        let failedAttentionCheck = 0;
+        let failedAttentionCheck1 = false;
+        let failedAttentionCheck2 = false;
+
+        let chatGPTdotTimer;
+
+        // Function to shuffle an array (Fisher-Yates algorithm)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i >= 1; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Select count random elements from each zone
+        function getRandomElements(arr, count) {
+            return shuffleArray(arr.slice()).slice(0, count);
+        }
+
+        let questions = [
+            ...getRandomElements(questions_zone_1, 7),
+            ...getRandomElements(questions_zone_2, 7),
+            ...getRandomElements(questions_zone_3, 7),
+        ];
+
+        //shuffle the questions
+        questions = shuffleArray(questions);
+
+        console.log("Selected questions:", questions);
+
+        // We have 6 wrong answers out of 21, that is ~29% wrong answers
+        const wrongSuggestionIndices = [5, 8, 11, 13, 16, 19]; //here the indexes starts from 0
+        console.log("Wrong suggestion indices:", wrongSuggestionIndices);
+
+
+        // Calculate error percentage
+        const totalQuestions = questions.length;
+        const wrongAnswers = wrongSuggestionIndices.length;
+        const error_percentage = (wrongAnswers / totalQuestions) * 100;
+
+        console.log("error_percentage: ", error_percentage)
+
+        function isWrongSuggestion(questionIdx) {
+            return wrongSuggestionIndices.includes(questionIdx);
+        }
+
+
+        saveTime();
+
+        document.getElementById("consent-button").addEventListener("click", async function () {
+
+            const isMajeur = document.querySelector('input[name="majeur"]:checked');
+            const isAccepted = document.querySelector('input[name="consentement"]:checked');
+
+            // Reset error messages
+            document.getElementById("age-selection-error").style.display = "none";
+            document.getElementById("consent-error").style.display = "none";
+
+            // Check if both inputs are selected
+            if (!isMajeur || !isAccepted) {
+                document.getElementById("age-selection-error").style.display = !isMajeur ? "block" : "none";
+                document.getElementById("consent-error").style.display = !isAccepted ? "block" : "none";
+                return;
+            }
+
+            // Handle case where either input is "non"
+            if (isMajeur.value === "non" || isAccepted.value === "non") {
+                document.getElementById("consent-form").classList.add("hidden");
+                document.getElementById("thank-you").classList.remove("hidden");
+                return;
+            }
+
+
+
+            //execution of the invisible captcha
+            grecaptcha.ready(() => {
+                grecaptcha.execute({ action: 'submit' }).then(async function (token) {
+                    //token sended to the server for verification
+                    const captchaRes = await fetch('/verify-captcha', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ token })
+                    });
+                    const captchaData = await captchaRes.json();
+
+                    if (!captchaData.success) {
+                        alert("Captcha verification failed. Try again.");
+                        return;
+                    }
+
+                    console.log("User reCAPTACHA score:", captchaData.score);
+                    captcha_scores.push(captchaData.score);
+
+                    // normal execution after the captcha verification
+                    document.getElementById("consent-form").classList.add("hidden");
+
+
+                    fetch('/generate-user-id')
+                        .then((res) => res.json())
+                        .then((data) => {
+                            userId = data.userId;
+                            localStorage.setItem('userId', userId);
+                            console.log('Generated User ID:', userId);
+                        })
+                        .catch((err) => console.error('Error generating ID:', err));
+
+                    //show the instructions of the test
+                    document.getElementById("instructions").classList.remove("hidden");
+
+                });
+            });
+            saveTime();
+            timeIndex++;
+        });
+
+        async function askChatbot() {
+            isQuestionAsked = true;
+
+            const userQuestion = document.getElementById("userQuestion").value;
+            const askButton = document.getElementById("askButton");
+            const responseBox = document.getElementById("chatbotResponse");
+
+            document.getElementById("demander-error").style.display = "none";
+
+            //shows the dot in the response box
+            responseBox.innerHTML = '<span class="loader-dot">●</span>';
+            responseBox.classList.remove("hidden");
+
+            // hides the button
+            askButton.classList.add("hidden");
+
+            document.getElementById("userQuestion").disabled = true;
+
+            chatGPTdotTimer = setTimeout(() => {
+                // removes the loader-dot
+                responseBox.innerHTML = "";
+
+                const question_answer = isWrongSuggestion(actualQuestion) ? questions[actualQuestion].wrong_answer : questions[actualQuestion].correct_answer;
+                const response = isAttentionCheck1 || isAttentionCheck2 ? 'Thank you!' : question_answer;
+                console.log("question answer", question_answer);
+                console.log("response", response);
+
+                // starts the response effect
+                typeResponse(response, "chatbotResponse");
+            }, 1500); //1.5 seconds delay before showing the response
+
+            if (!isAttentionCheck1 && !isAttentionCheck2) {
+                saveTime();
+                timeIndex++;
+            }
+
+        }
+
+
+        function typeResponse(text, elementId, minDelay = 30, maxDelay = 500) {
+            const container = document.getElementById(elementId);
+
+            // removes everything, including the dot
+            container.innerHTML = "";
+            container.classList.remove("hidden");
+
+            const words = text.split(" ");
+            let cumulativeDelay = 0;
+
+            words.forEach((word, index) => {
+                const span = document.createElement("span");
+                span.textContent = word + " ";
+                span.style.opacity = "0";
+                span.style.transition = "opacity 0.5s ease-in";
+                container.appendChild(span);
+
+                const randomDelay = Math.floor(Math.random() * (maxDelay - minDelay + 1)) + minDelay;
+                cumulativeDelay += randomDelay;
+
+                setTimeout(() => {
+                    span.style.opacity = "1";
+                }, cumulativeDelay);
+            });
+        }
+
+
+        //handle the click on the likert scale
+        document.querySelectorAll('.likert-button').forEach(button => {
+            button.addEventListener('click', () => {
+                document.querySelectorAll('.likert-button').forEach(btn => btn.classList.remove('selected'));
+                button.classList.add('selected');
+                actualConfidence = button.getAttribute('data-value');
+                document.getElementById("confidence-error").style.display = "none";
+            });
+        });
+
+        //handle the click on the send button
+        function sendAnswer() {
+            const sendBtn = document.getElementById("sendButton");
+            sendBtn.disabled = true;
+            console.log("Send answer clicked (Next or Finished button)");
+            const userQuestion = document.getElementById("userQuestion").value;
+            const chatbotResponse = document.getElementById("chatbotResponse").innerText;
+            const userAnswer = document.getElementById("userAnswer").value;
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const PROLIFIC_PID = urlParams.get('PROLIFIC_PID');
+            const STUDY_ID = urlParams.get('STUDY_ID');
+            const SESSION_ID = urlParams.get('SESSION_ID');
+
+            if (!isQuestionAsked && !isAttentionCheck1 && !isAttentionCheck2) {
+                document.getElementById("demander-error").style.display = "block";
+                sendBtn.disabled = false;
+                return;
+            }
+
+            if (userAnswer === "" && !isAttentionCheck1 && !isAttentionCheck2) {
+                document.getElementById("demander-error").style.display = "none";
+                document.getElementById("answer-error").style.display = "block";
+                sendBtn.disabled = false;
+                return;
+            }
+
+            if (actualConfidence === 0 && !isAttentionCheck1 && !isAttentionCheck2) {
+                document.getElementById("demander-error").style.display = "none";
+                document.getElementById("answer-error").style.display = "none";
+                document.getElementById("confidence-error").style.display = "block";
+                sendBtn.disabled = false;
+                return;
+            }
+
+            clearTimeout(chatGPTdotTimer); //clear the timer for the dots if the user clicks too fast
+            console.log("cleared chatGPTdotTimer");
+
+            document.getElementById("answer-error").style.display = "none";
+            document.getElementById("confidence-error").style.display = "none";
+            document.getElementById("demander-error").style.display = "none";
+
+            //execute the reCAPTCHA
+            grecaptcha.ready(() => {
+                grecaptcha.execute({ action: 'submit' }).then(async function (token) {
+                    try {
+                        const captchaRes = await fetch('/verify-captcha', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ token })
+                        });
+
+                        const captchaData = await captchaRes.json();
+
+                        if (!captchaData.success) {
+                            alert("CAPTCHA verification failed. Please try again.");
+                            sendBtn.disabled = false;
+                            return;
+                        }
+
+                        //if captcha is ok then we can save the score
+                        console.log("User score (sendAnswer):", captchaData.score);
+                        captcha_scores.push(captchaData.score);
+
+                        if (!userId) {
+                            alert('Error: User ID not found.');
+                            sendBtn.disabled = false;
+                            return;
+                        }
+
+                        if (isAttentionCheck1) {
+                            //checks the success conditions
+                            const userAnswer = document.getElementById("userAnswer").value.trim();
+                            const selectedConfidence = actualConfidence;
+                            const hasClickedAsk = isQuestionAsked;
+
+                            const success =
+                                userAnswer === "" &&
+                                selectedConfidence === "Moderately confident" &&
+                                hasClickedAsk;
+
+                            if (!success) {
+                                failedAttentionCheck++;
+                                failedAttentionCheck1 = true;
+                            }
+
+                            document.getElementById('questionCounter').style.display = "inline-block";
+                            document.getElementById("sendButton").textContent = "Next";
+                            document.getElementById('questionCounter').textContent = `${actualQuestion + 1}/21`;
+                            document.getElementById('question').innerHTML = questions[actualQuestion].question;
+
+                            document.getElementById("userAnswer").value = "";
+                            document.getElementById("chatbotResponse").innerText = "";
+                            document.getElementById("chatbotResponse").classList.add("hidden");
+                            document.getElementById("userQuestion").value = "";
+                            document.getElementById("userQuestion").disabled = false;
+                            document.querySelectorAll('.likert-button').forEach(btn => btn.classList.remove('selected'));
+                            actualConfidence = 0;
+                            document.getElementById("askButton").classList.remove("hidden");
+
+                            isAttentionCheck1 = false;
+
+                            saveTime();
+                            timeIndex++;
+
+                            startTime = performance.now(); // set the timer for the next question
+                            console.log("Start time for the next question", actualQuestion + 2, ":", startTime);
+
+                            sendBtn.disabled = false;
+                            return;
+                        }
+
+                        if (isAttentionCheck2) {
+                            // checks the success conditions
+                            const userAnswer = document.getElementById("userAnswer").value.trim();
+                            const selectedConfidence = actualConfidence;
+                            const hasClickedAsk = isQuestionAsked;
+
+                            const success =
+                                userAnswer === "" &&
+                                selectedConfidence === "Not at all confident" &&
+                                !hasClickedAsk;
+
+                            if (!success) {
+                                failedAttentionCheck++;
+                                failedAttentionCheck2 = true;
+                                if (failedAttentionCheck >= 2) {
+                                    userId = null;
+                                    document.querySelector('.main-container').classList.add('hidden');
+                                    document.getElementById("attention-check-failed").classList.remove("hidden");
+                                }
+                            }
+
+                            document.getElementById('questionCounter').style.display = "inline-block";
+                            document.getElementById("sendButton").textContent = "Next";
+                            document.getElementById('questionCounter').textContent = `${actualQuestion + 1}/21`;
+                            document.getElementById('question').innerHTML = questions[actualQuestion].question;
+
+                            document.getElementById("userAnswer").value = "";
+                            document.getElementById("chatbotResponse").innerText = "";
+                            document.getElementById("chatbotResponse").classList.add("hidden");
+                            document.getElementById("userQuestion").value = "";
+                            document.getElementById("userQuestion").disabled = false;
+                            document.querySelectorAll('.likert-button').forEach(btn => btn.classList.remove('selected'));
+                            actualConfidence = 0;
+                            document.getElementById("askButton").classList.remove("hidden");
+
+                            isAttentionCheck2 = false;
+
+                            saveTime();
+                            timeIndex++;
+
+                            startTime = performance.now(); // set the timer for the next question
+                            console.log("Start time for the next question", actualQuestion + 2, ":", startTime);
+
+                            sendBtn.disabled = false;
+                            return;
+                        }
+
+                        responses.push(userAnswer);
+                        confidences.push(actualConfidence);
+                        userQuestions.push(userQuestion);
+                        chatbotResponses.push(chatbotResponse);
+
+                        keystrokesPerQuestion.push([...keystrokes]);  // Copy to avoid reference
+                        keystrokes = [];        // Reset for the next question
+
+                        startTime = performance.now(); // reset the timer for the next question
+                        console.log("Start time for question", actualQuestion + 2, ":", startTime);
+
+                        saveTime();
+                        timeIndex++;
+
+                        isQuestionAsked = false;
+
+                        console.log("actualQuestion before:", actualQuestion);
+                        if (actualQuestion === 20) { //if is the last question then we will send the answer to the server
+                            console.log("Sending data to server...");
+                            fetch('/save-response', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    userId: userId,
+                                    userAgent: navigator.userAgent,
+                                    screenWidth: window.screen.width,
+                                    screenHeight: window.screen.height,
+                                    test: "chatbot",
+                                    error_percentage: `${error_percentage.toFixed(2)}%`,
+                                    PROLIFIC_PID: PROLIFIC_PID,
+                                    STUDY_ID: STUDY_ID,
+                                    SESSION_ID: SESSION_ID,
+                                    total_times: {
+                                        consent_time: times[0] + " seconds",
+                                        tutorial_time: times[1] + " seconds", //tutorial time = instructions time
+                                        attention_check_1_time: times[14] + " seconds",
+                                        attention_check_2_time: times[29] + " seconds",
+                                        test_time: (times.slice(2, 46).reduce((a, b) => a + b, 0)) + " seconds",
+                                    },
+                                    tutorial_times: {
+                                        instructions_time: times[1] + " seconds",
+                                    },
+                                    captcha_scores_average: (captcha_scores.reduce((a, b) => a + b, 0) / captcha_scores.length).toFixed(3), //average captcha scores
+                                    attention_check: {
+                                        total_failed: failedAttentionCheck,
+                                        failed_check_1: failedAttentionCheck1,
+                                        failed_check_2: failedAttentionCheck2,
+                                    },
+                                    question_1: {
+                                        question: questions[0].question,
+                                        is_wrong_suggestion: isWrongSuggestion(0),
+                                        chatbot_response: chatbotResponses[0],
+                                        answer: responses[0],
+                                        confidence: confidences[0],
+                                        time_before_chatbot_answer: times[2] == 0 ? "No chatbot answer" : times[2] + " seconds",
+                                        time_after_chatbot_answer: times[3] + " seconds",
+                                        typed_input: keystrokesPerQuestion[0]
+                                    },
+                                    question_2: {
+                                        question: questions[1].question,
+                                        is_wrong_suggestion: isWrongSuggestion(1),
+                                        chatbot_response: chatbotResponses[1],
+                                        answer: responses[1],
+                                        confidence: confidences[1],
+                                        time_before_chatbot_answer: times[4] == 0 ? "No chatbot answer" : times[4] + " seconds",
+                                        time_after_chatbot_answer: times[5] + " seconds",
+                                        typed_input: keystrokesPerQuestion[1]
+                                    },
+                                    question_3: {
+                                        question: questions[2].question,
+                                        is_wrong_suggestion: isWrongSuggestion(2),
+                                        chatbot_response: chatbotResponses[2],
+                                        answer: responses[2],
+                                        confidence: confidences[2],
+                                        time_before_chatbot_answer: times[6] == 0 ? "No chatbot answer" : times[6] + " seconds",
+                                        time_after_chatbot_answer: times[7] + " seconds",
+                                        typed_input: keystrokesPerQuestion[2]
+                                    },
+                                    question_4: {
+                                        question: questions[3].question,
+                                        is_wrong_suggestion: isWrongSuggestion(3),
+                                        chatbot_response: chatbotResponses[3],
+                                        answer: responses[3],
+                                        confidence: confidences[3],
+                                        time_before_chatbot_answer: times[8] == 0 ? "No chatbot answer" : times[8] + " seconds",
+                                        time_after_chatbot_answer: times[9] + " seconds",
+                                        typed_input: keystrokesPerQuestion[3]
+                                    },
+                                    question_5: {
+                                        question: questions[4].question,
+                                        is_wrong_suggestion: isWrongSuggestion(4),
+                                        chatbot_response: chatbotResponses[4],
+                                        answer: responses[4],
+                                        confidence: confidences[4],
+                                        time_before_chatbot_answer: times[10] == 0 ? "No chatbot answer" : times[10] + " seconds",
+                                        time_after_chatbot_answer: times[11] + " seconds",
+                                        typed_input: keystrokesPerQuestion[4]
+                                    },
+                                    question_6: {
+                                        question: questions[5].question,
+                                        is_wrong_suggestion: isWrongSuggestion(5),
+                                        chatbot_response: chatbotResponses[5],
+                                        answer: responses[5],
+                                        confidence: confidences[5],
+                                        time_before_chatbot_answer: times[12] == 0 ? "No chatbot answer" : times[12] + " seconds",
+                                        time_after_chatbot_answer: times[13] + " seconds",
+                                        typed_input: keystrokesPerQuestion[5]
+                                    },
+                                    question_7: {
+                                        question: questions[6].question,
+                                        is_wrong_suggestion: isWrongSuggestion(6),
+                                        chatbot_response: chatbotResponses[6],
+                                        answer: responses[6],
+                                        confidence: confidences[6],
+                                        time_before_chatbot_answer: times[15] == 0 ? "No chatbot answer" : times[15] + " seconds",
+                                        time_after_chatbot_answer: times[16] + " seconds",
+                                        typed_input: keystrokesPerQuestion[6]
+                                    },
+                                    question_8: {
+                                        question: questions[7].question,
+                                        is_wrong_suggestion: isWrongSuggestion(7),
+                                        chatbot_response: chatbotResponses[7],
+                                        answer: responses[7],
+                                        confidence: confidences[7],
+                                        time_before_chatbot_answer: times[17] == 0 ? "No chatbot answer" : times[17] + " seconds",
+                                        time_after_chatbot_answer: times[18] + " seconds",
+                                        typed_input: keystrokesPerQuestion[7]
+                                    },
+                                    question_9: {
+                                        question: questions[8].question,
+                                        is_wrong_suggestion: isWrongSuggestion(8),
+                                        chatbot_response: chatbotResponses[8],
+                                        answer: responses[8],
+                                        confidence: confidences[8],
+                                        time_before_chatbot_answer: times[19] == 0 ? "No chatbot answer" : times[19] + " seconds",
+                                        time_after_chatbot_answer: times[20] + " seconds",
+                                        typed_input: keystrokesPerQuestion[8]
+                                    },
+                                    question_10: {
+                                        question: questions[9].question,
+                                        is_wrong_suggestion: isWrongSuggestion(9),
+                                        chatbot_response: chatbotResponses[9],
+                                        answer: responses[9],
+                                        confidence: confidences[9],
+                                        time_before_chatbot_answer: times[21] == 0 ? "No chatbot answer" : times[21] + " seconds",
+                                        time_after_chatbot_answer: times[22] + " seconds",
+                                        typed_input: keystrokesPerQuestion[9]
+                                    },
+                                    question_11: {
+                                        question: questions[10].question,
+                                        is_wrong_suggestion: isWrongSuggestion(10),
+                                        chatbot_response: chatbotResponses[10],
+                                        answer: responses[10],
+                                        confidence: confidences[10],
+                                        time_before_chatbot_answer: times[23] == 0 ? "No chatbot answer" : times[23] + " seconds",
+                                        time_after_chatbot_answer: times[24] + " seconds",
+                                        typed_input: keystrokesPerQuestion[10]
+                                    },
+                                    question_12: {
+                                        question: questions[11].question,
+                                        is_wrong_suggestion: isWrongSuggestion(11),
+                                        chatbot_response: chatbotResponses[11],
+                                        answer: responses[11],
+                                        confidence: confidences[11],
+                                        time_before_chatbot_answer: times[25] == 0 ? "No chatbot answer" : times[25] + " seconds",
+                                        time_after_chatbot_answer: times[26] + " seconds",
+                                        typed_input: keystrokesPerQuestion[11]
+                                    },
+                                    question_13: {
+                                        question: questions[12].question,
+                                        is_wrong_suggestion: isWrongSuggestion(12),
+                                        chatbot_response: chatbotResponses[12],
+                                        answer: responses[12],
+                                        confidence: confidences[12],
+                                        time_before_chatbot_answer: times[27] == 0 ? "No chatbot answer" : times[28] + " seconds",
+                                        time_after_chatbot_answer: times[28] + " seconds",
+                                        typed_input: keystrokesPerQuestion[12]
+                                    },
+                                    question_14: {
+                                        question: questions[13].question,
+                                        is_wrong_suggestion: isWrongSuggestion(13),
+                                        chatbot_response: chatbotResponses[13],
+                                        answer: responses[13],
+                                        confidence: confidences[13],
+                                        time_before_chatbot_answer: times[30] == 0 ? "No chatbot answer" : times[30] + " seconds",
+                                        time_after_chatbot_answer: times[31] + " seconds",
+                                        typed_input: keystrokesPerQuestion[13]
+                                    },
+                                    question_15: {
+                                        question: questions[14].question,
+                                        is_wrong_suggestion: isWrongSuggestion(14),
+                                        chatbot_response: chatbotResponses[14],
+                                        answer: responses[14],
+                                        confidence: confidences[14],
+                                        time_before_chatbot_answer: times[32] == 0 ? "No chatbot answer" : times[32] + " seconds",
+                                        time_after_chatbot_answer: times[33] + " seconds",
+                                        typed_input: keystrokesPerQuestion[14]
+                                    },
+                                    question_16: {
+                                        question: questions[15].question,
+                                        is_wrong_suggestion: isWrongSuggestion(15),
+                                        chatbot_response: chatbotResponses[15],
+                                        answer: responses[15],
+                                        confidence: confidences[15],
+                                        time_before_chatbot_answer: times[34] == 0 ? "No chatbot answer" : times[34] + " seconds",
+                                        time_after_chatbot_answer: times[35] + " seconds",
+                                        typed_input: keystrokesPerQuestion[15]
+                                    },
+                                    question_17: {
+                                        question: questions[16].question,
+                                        is_wrong_suggestion: isWrongSuggestion(16),
+                                        chatbot_response: chatbotResponses[16],
+                                        answer: responses[16],
+                                        confidence: confidences[16],
+                                        time_before_chatbot_answer: times[36] == 0 ? "No chatbot answer" : times[36] + " seconds",
+                                        time_after_chatbot_answer: times[37] + " seconds",
+                                        typed_input: keystrokesPerQuestion[16]
+                                    },
+                                    question_18: {
+                                        question: questions[17].question,
+                                        is_wrong_suggestion: isWrongSuggestion(17),
+                                        chatbot_response: chatbotResponses[17],
+                                        answer: responses[17],
+                                        confidence: confidences[17],
+                                        time_before_chatbot_answer: times[38] == 0 ? "No chatbot answer" : times[38] + " seconds",
+                                        time_after_chatbot_answer: times[39] + " seconds",
+                                        typed_input: keystrokesPerQuestion[17]
+                                    },
+                                    question_19: {
+                                        question: questions[18].question,
+                                        is_wrong_suggestion: isWrongSuggestion(18),
+                                        chatbot_response: chatbotResponses[18],
+                                        answer: responses[18],
+                                        confidence: confidences[18],
+                                        time_before_chatbot_answer: times[40] == 0 ? "No chatbot answer" : times[40] + " seconds",
+                                        time_after_chatbot_answer: times[41] + " seconds",
+                                        typed_input: keystrokesPerQuestion[18]
+                                    },
+                                    question_20: {
+                                        question: questions[19].question,
+                                        is_wrong_suggestion: isWrongSuggestion(19),
+                                        chatbot_response: chatbotResponses[19],
+                                        answer: responses[19],
+                                        confidence: confidences[19],
+                                        time_before_chatbot_answer: times[42] == 0 ? "No chatbot answer" : times[42] + " seconds",
+                                        time_after_chatbot_answer: times[43] + " seconds",
+                                        typed_input: keystrokesPerQuestion[19]
+                                    },
+                                    question_21: {
+                                        question: questions[20].question,
+                                        is_wrong_suggestion: isWrongSuggestion(20),
+                                        chatbot_response: chatbotResponses[20],
+                                        answer: responses[20],
+                                        confidence: confidences[20],
+                                        time_before_chatbot_answer: times[44] == 0 ? "No chatbot answer" : times[44] + " seconds",
+                                        time_after_chatbot_answer: times[45] + " seconds",
+                                        typed_input: keystrokesPerQuestion[20]
+                                    }
+                                }),
+                            })
+                                .then((res) => res.json())
+                                .then((data) => {
+                                    console.log(data.message);
+                                    document.querySelector('.main-container').classList.add('blurred');
+
+                                    //disable the fields and buttons after the last question
+                                    document.getElementById("userAnswer").disabled = true;
+                                    document.getElementById("userQuestion").disabled = true;
+                                    document.querySelectorAll('.likert-button').forEach(btn => btn.disabled = true);
+                                    document.getElementById("sendButton").disabled = true;
+                                    document.getElementById("askButton").disabled = true;
+
+                                    document.querySelector('.main-container').classList.add('hidden');
+                                    document.getElementById("questionnaire-instructions").classList.remove("hidden");
+                                })
+                                .catch((error) => {
+                                    console.error('submit error:', error);
+                                    sendBtn.disabled = false;
+                                });
+                        } else { //if is not the last question then we will show the next question
+                            actualQuestion++;
+
+                            if (actualQuestion === 6) {
+                                showAttentionCheck1();
+                                sendBtn.disabled = false;
+                                return;
+                            }
+
+                            if (actualQuestion === 13) {
+                                showAttentionCheck2();
+                                sendBtn.disabled = false;
+                                return;
+                            }
+
+                            document.getElementById('questionCounter').style.display = "inline-block";
+                            document.getElementById("sendButton").textContent = "Next";
+                            document.getElementById('questionCounter').textContent = `${actualQuestion + 1}/21`;
+                            document.getElementById('question').innerHTML = questions[actualQuestion].question;
+
+                            document.getElementById("userAnswer").value = "";
+                            document.getElementById("chatbotResponse").innerText = "";
+                            document.getElementById("chatbotResponse").classList.add("hidden");
+                            document.getElementById("userQuestion").value = "";
+                            document.getElementById("userQuestion").disabled = false;
+                            document.querySelectorAll('.likert-button').forEach(btn => btn.classList.remove('selected'));
+                            actualConfidence = 0;
+                            document.getElementById("askButton").classList.remove("hidden");
+
+                            if (actualQuestion === 20) {
+                                document.getElementById("sendButton").textContent = "Finish";
+                            }
+                            sendBtn.disabled = false;
+                        }
+                    } catch (err) {
+                        // Catch unexpected errors inside the async .then handler
+                        console.error('Error while processing sendAnswer:', err);
+                        sendBtn.disabled = false;
+                        alert("An error occurred. Most likely you have a network issue.Please try again.");
+                    }
+                })
+            });
+        }
+
+        function showAttentionCheck1() {
+            isAttentionCheck1 = true;
+
+            document.getElementById("userAnswer").value = "";
+
+            document.querySelectorAll('.likert-button').forEach(btn => btn.classList.remove('selected'));
+
+            //shows attention check message 
+            document.getElementById("question").innerHTML = `
+                This is an attention check. Please: click <strong>Ask</strong>, do <strong>not</strong> enter any text
+                in your own answer textbox, rate your confidence as <strong>Moderately confident</strong>, then click <strong>Next</strong>.
+            `;
+
+            document.getElementById("askButton").disabled = false;
+            document.getElementById("askButton").classList.remove("hidden");
+
+            document.getElementById("chatbotResponse").classList.add("hidden");
+            document.getElementById("chatbotResponse").innerText = "";
+
+            isQuestionAsked = false;
+            actualConfidence = 0;
+        }
+
+        function showAttentionCheck2() {
+            isAttentionCheck2 = true;
+
+            document.getElementById("userAnswer").value = "";
+
+            document.querySelectorAll('.likert-button').forEach(btn => btn.classList.remove('selected'));
+
+            // shows attention check message
+            document.getElementById("question").innerHTML = `
+                To make sure you're paying attention, please: do <strong>not</strong> click <strong>Ask</strong>, do <strong>not</strong> enter any text
+                in your own answer textbox, rate your confidence as <strong>Not at all confident</strong>, then click <strong>Next</strong>.
+            `;
+
+            document.getElementById("askButton").disabled = false;
+            document.getElementById("askButton").classList.remove("hidden");
+
+            document.getElementById("chatbotResponse").classList.add("hidden");
+            document.getElementById("chatbotResponse").innerText = "";
+
+            isQuestionAsked = false;
+            actualConfidence = 0;
+        }
+
+        // shows the instructions after the user clicks on the start button
+        const startBtn = document.getElementById("start-button");
+        if (startBtn) {
+            startBtn.addEventListener("click", function () {
+                // hide the instructions
+                goToStep(2);
+                const instructions = document.getElementById("instructions");
+                const mainContainer = document.querySelector(".main-container");
+                if (instructions) instructions.classList.add("hidden");
+                if (mainContainer) {
+                    mainContainer.classList.remove("hidden");
+                    document.getElementById('sendButton').disabled = false;
+                    tutorial = false;
+                    document.getElementById('questionCounter').style.display = "inline-block";
+                    document.getElementById("sendButton").textContent = "Next";
+                    document.getElementById('questionCounter').textContent = `${actualQuestion + 1}/21`;
+                    document.getElementById('question').innerHTML = questions[actualQuestion].question;
+
+                    document.getElementById("userAnswer").value = "";
+                    document.getElementById("chatbotResponse").innerText = "";
+                    document.getElementById("chatbotResponse").classList.add("hidden");
+                    document.getElementById("userQuestion").value = "";
+                    document.getElementById("userQuestion").disabled = false;
+                    document.getElementById("userAnswer").value = "";
+                    document.getElementById("userAnswer").disabled = false;
+                    document.getElementById("askButton").disabled = false;
+                    document.getElementById("askButton").classList.remove("hidden");
+
+                    document.querySelectorAll('.likert-button').forEach(btn => btn.classList.remove('selected'));
+                    actualConfidence = 0;
+                    isQuestionAsked = false;
+                    startTime = performance.now();
+                    console.log("Start time for the first question: ", actualQuestion + 1, ":", startTime);
+                }
+            });
+        }
+
+        //allow to send the age question with the enter key
+        document.addEventListener('DOMContentLoaded', function () {
+            const ageInput = document.querySelector('.age-input');
+            if (ageInput) {
+                ageInput.addEventListener('keydown', function (event) {
+                    if (event.key === 'Enter') {
+                        event.preventDefault();
+                        document.getElementById('consent-button').click();
+                    }
+                });
+            }
+        });
+
+        //enable the enter key to submit the Start button of the instructions
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+                const startButton = document.getElementById('start-button');
+                const instructions = document.getElementById('instructions');
+
+                if (instructions && !instructions.classList.contains('hidden') && startButton) {
+                    event.preventDefault();
+                    startButton.click();
+                    goToStep(2);
+                }
+            }
+        });
+
+        // function to reset chatbot answer typing if moving to the next question
+        let typingInProgress = false; // Flag to track if typing is in progress
+        let typingTimeout; // Timeout to interrupt typing
+
+        function typeInTextarea(textarea, text, delay = 100) {
+            let index = 0;
+            let typed = "";
+
+            // Set the flag to indicate typing is in progress
+            typingInProgress = true;
+
+            function typeNext() {
+                if (!typingInProgress) {
+                    // If typing was interrupted, exit the function
+                    return;
+                }
+
+                if (index < text.length) {
+                    typed += text.charAt(index);
+                    textarea.value = typed;
+                    textarea.dispatchEvent(new Event('input'));
+                    index++;
+                    typingTimeout = setTimeout(typeNext, delay);
+                } else {
+                    // Finish typing and reset the flag
+                    setTimeout(() => {
+                        textarea.dispatchEvent(new Event('input'));
+                        typingInProgress = false;
+                    }, 800);
+                }
+            }
+
+            typeNext();
+        }
+
+        //handle the click on start questionnaire 
+        document.getElementById("start-questionnaire-button").addEventListener("click", async function () {
+            // hide the instructions
+            document.getElementById("start-questionnaire-button").disabled = true;
+            const instructions = document.getElementById("questionnaire-instructions");
+            if (instructions) {
+                saveTime();
+
+                try {
+                    await fetch('/save-thank-you-time', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ thank_you_time: times[46] + "seconds", user_id: userId })
+                    });
+
+                    // DEMO PLACEHOLDER: the real study redirects to the LimeSurvey questionnaire here.
+                    // There is no questionnaire server in this demo, so we show a placeholder that
+                    // explains what would happen instead.
+                    document.getElementById("questionnaire-instructions").querySelector(".instructions-content").innerHTML =
+                        '<h1>📋 The questionnaire would appear here</h1>' +
+                        '<p><strong>This is a placeholder.</strong> At this point in the real study, participants are redirected to a <strong>separate LimeSurvey survey</strong> (hosted on a different server) containing the post-experiment <strong>profile questionnaire</strong> — a few questions about age, gender, education, and familiarity with and confidence in AI.</p>' +
+                        '<p>This public demo does not include the LimeSurvey server, so that questionnaire is skipped and nothing is collected.</p>' +
+                        '<p><strong>After the questionnaire, the real study redirects participants to the debriefing page.</strong> You can continue to it now, exactly as participants did:</p>' +
+                        '<p style="text-align:center; margin-top:24px;"><a href="debriefing-demo.html" class="start-button" style="display:inline-block; text-decoration:none;">Continue to the debriefing →</a></p>' +
+                        '<p style="margin-top:24px;"><a href="index.html">← Back to the demos</a> &nbsp;·&nbsp; <a href="#" onclick="window.location.reload();return false;">Restart this demo</a></p>';
+
+                } catch (e) {
+                    console.error('Error in saving the thank you page time:', e);
+                }
+
+            }
+            //setTimeout(() => tour.start(), 200);
+        });
+
+
+        function checkDeviceAndSize() {
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Tablet/i.test(navigator.userAgent);
+
+            if (isMobile) {
+                document.body.innerHTML = `
+                    <div style="text-align: center; font-family: Arial, sans-serif;">
+                        <h1>Unsupported Device or Screen Size</h1>
+                        <p>This application is not supported on smartphones or small screens. Please use a desktop, laptop, or large tablet to access it.</p>
+                        <p>Please click the button below to return to Prolific and complete your submission.</p>
+                        <a href="prolific-placeholder.html">
+                            <button style="margin-top: 20px; padding: 12px 28px; font-size: 18px; background-color: #000; color: #fff; border: none; border-radius: 6px; cursor: pointer;">
+                                Finish and Return to Prolific
+                            </button>
+                        </a>
+                    </div>
+                `;
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", checkDeviceAndSize);
+
+
+        function saveTime() {
+            //take the time in which the user start the real test, so go to the first question
+            const currentTime = new Date().getTime();
+            if (lastSubmitTime !== null) {
+                const timeSpent = (currentTime - lastSubmitTime) / 1000; // converts milliseconds to seconds
+                // Save the time spent on the tutorial question
+                if (times[timeIndex] === undefined || isNaN(times[timeIndex])) {
+                    times[timeIndex] = 0;
+                }
+
+                // Add the time spent to the current step
+                times[timeIndex] += timeSpent;
+            }
+            lastSubmitTime = currentTime;
+            console.log(`Step: ${timeIndex}, Time spent: ${times[timeIndex]} seconds`);
+            console.log("Array of times:");
+            console.log(times);
+        }
+
+
+        function goToStep(index) {
+            saveTime();
+            timeIndex = index;
+        }
+
+
+        //starts the timer and saves the keystrokes
+        document.getElementById("userAnswer").addEventListener('keydown', (e) => {
+            const elapsed = (performance.now() - startTime) / 1000;
+            keystrokes.push({
+                key: e.key,
+                timestamp: parseFloat(elapsed.toFixed(3))
+            });
+        });
+
+
+    </script>
+</body>
+
+</html>

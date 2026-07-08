@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Agent Study — Interactive Demos</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: white;
+            color: #222;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .wrap {
+            width: 100%;
+            max-width: 760px;
+            padding: 40px 20px 80px;
+        }
+
+        h1 {
+            font-size: 30px;
+            margin-bottom: 4px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        .notice {
+            background-color: #111;
+            color: #fff;
+            padding: 14px 18px;
+            border-radius: 8px;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .notice strong {
+            color: #ffd166;
+        }
+
+        .cards {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .card {
+            display: block;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            padding: 22px 24px;
+            text-decoration: none;
+            color: inherit;
+            transition: box-shadow 0.15s ease, border-color 0.15s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            border-color: #bbb;
+        }
+
+        .card h2 {
+            margin: 0 0 6px 0;
+            font-size: 20px;
+        }
+
+        .card p {
+            margin: 0;
+            color: #555;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        .tag {
+            display: inline-block;
+            font-size: 12px;
+            font-weight: bold;
+            color: #fff;
+            background-color: #333;
+            padding: 2px 8px;
+            border-radius: 999px;
+            margin-bottom: 10px;
+            letter-spacing: 0.03em;
+        }
+
+        footer {
+            margin-top: 40px;
+            font-size: 13px;
+            color: #888;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <h1>AI Agent Study — Interactive Demos</h1>
+        <p class="subtitle">Try the two AI-assistance conditions used in our study of how AI suggestions influence
+            the answers people give and how confident they feel. Each condition reproduces one of the two dominant
+            LLM interaction formats, injecting correct or wrong suggestions.</p>
+
+        <div class="notice">
+            🧪 <strong>These are demonstration pages, not the live study.</strong> They are the real experiment
+            interfaces with data collection removed: nothing you type is saved, transmitted, or recorded — there is
+            no reCAPTCHA, no questionnaire server, and no participant tracking. Nothing leaves your browser. Reload a
+            page to restart it.
+        </div>
+
+        <div class="cards">
+            <a class="card" href="autocomplete-demo.html">
+                <span class="tag">AUTOCOMPLETE</span>
+                <h2>Inline autocomplete</h2>
+                <p>You write your own answer, and the agent proposes a completion inline as you type. Press TAB to
+                    accept the suggestion, or ignore it and keep typing.</p>
+            </a>
+
+            <a class="card" href="chatbot-demo.html">
+                <span class="tag">CHATBOT</span>
+                <h2>Conversational chatbot</h2>
+                <p>You ask a built-in chatbot and read its reply, then write your own answer. The reply is a
+                    deterministic, scripted suggestion — the same manipulation as the autocomplete condition.</p>
+            </a>
+        </div>
+
+        <footer>
+            Study conducted by INRIA and LAPCOS (Université Côte d'Azur, France).<br>
+            Contact: <a href="mailto:arnaud.legout@inria.fr">arnaud.legout@inria.fr</a>
+        </footer>
+    </div>
+</body>
+
+</html>
